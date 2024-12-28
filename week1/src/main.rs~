@@ -1,0 +1,8 @@
+// This program aims to print a hello world
+// C
+fn main() {
+    println!("Hello, world!");
+    println!("Hello world can hello")
+    print!("Hello")
+    // This function is 
+}
