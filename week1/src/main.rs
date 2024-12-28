@@ -1,6 +1,7 @@
 use clap::Parser; // Similar to python argparse
 
 use week1::create_fruit_salad;
+use week1::frequency_counter;
 
 use rand::seq::SliceRandom;
 use rand::thread_rng;
@@ -26,6 +27,7 @@ fn main() {
     ex_linkedlist();
     ex_use_of_collect();
 
+    // Creating a fruit salad
     let args: Args = Args::parse();
     let num_fruits = args.num as usize;
     println!("Creating a fruit salad with {} fruits", num_fruits);
@@ -33,6 +35,17 @@ fn main() {
     println!("Fruit salad created!");
     for i in 0..num_fruits {
         println!("Fruit {}: {}", i + 1, fruits[i]);
+    }
+
+    // Frequency counter
+    // This function counts the frequency of each element in a vector
+    println!("Frequency counter:");
+    let numbers: Vec<i32> = vec![
+        1, 2, 3, 2, 1, 2, 3, 4, 6, 8, 99, 8, 7, 6, 66, 66, 66, 4, 3, 2, 1,
+    ];
+    let cnt_map = frequency_counter(numbers);
+    for (key, value) in cnt_map {
+        println!("{} appears {} times", key, value);
     }
 }
 

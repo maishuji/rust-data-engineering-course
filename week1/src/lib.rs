@@ -19,3 +19,13 @@ pub fn create_fruit_salad(num_fruits: usize) -> Vec<String> {
     fruits.truncate(num_fruits);
     fruits
 }
+
+pub fn frequency_counter(numbers: Vec<i32>) -> Vec<(i32, usize)> {
+    let mut counts = std::collections::HashMap::new();
+    for number in numbers {
+        *counts.entry(number).or_insert(0) += 1;
+    }
+    let mut counts: Vec<_> = counts.into_iter().collect();
+    counts.sort_by_key(|&(_, count)| count);
+    counts
+}
