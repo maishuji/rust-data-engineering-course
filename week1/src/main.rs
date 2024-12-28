@@ -1,9 +1,23 @@
 use clap::Parser; // Similar to python argparse
 
+use week1::create_fruit_salad;
+
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::collections::LinkedList;
 use std::collections::VecDeque;
+
+#[derive(Parser)]
+#[clap(
+    name = "Fruit Salad",
+    version = "1.0",
+    author = "maishuji",
+    about = "Creates a fruit salad with a random selection of fruits"
+)]
+struct Args {
+    #[clap(short, long, default_value_t = 5)]
+    num: u8,
+}
 
 fn main() {
     ex_collections();
@@ -11,6 +25,15 @@ fn main() {
     ex_vecdeque();
     ex_linkedlist();
     ex_use_of_collect();
+
+    let args: Args = Args::parse();
+    let num_fruits = args.num as usize;
+    println!("Creating a fruit salad with {} fruits", num_fruits);
+    let fruits = create_fruit_salad(num_fruits);
+    println!("Fruit salad created!");
+    for i in 0..num_fruits {
+        println!("Fruit {}: {}", i + 1, fruits[i]);
+    }
 }
 
 fn ex_collections() {
