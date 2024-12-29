@@ -26,6 +26,7 @@ fn main() {
     ex_vecdeque();
     ex_linkedlist();
     ex_use_of_collect();
+    ex_iter_map_reduce_fold();
 
     // Creating a fruit salad
     let args: Args = Args::parse();
@@ -138,4 +139,31 @@ fn ex_use_of_collect() {
     for (key, value) in &collected {
         println!("{}: {}", key, value);
     }
+}
+
+fn ex_iter_map_reduce_fold() {
+    /*
+     * This function shows how to use iterator
+     * - map
+     * - filter
+     * - reduce / fold
+     *
+     */
+    let numbers = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+    println!("Original numbers: {:?}", numbers);
+    // Map
+    // This will multiply each element by 2
+    let doubled: Vec<i32> = numbers.iter().map(|x| x * 2).collect();
+    println!("\t [map] Doubled: {:?}", doubled);
+
+    // Filter
+    // This will filter out all odd numbers
+    let evens: Vec<&i32> = numbers.iter().filter(|&&x| x % 2 == 0).collect();
+    println!("\t [filter] Evens: {:?}", evens);
+
+    // Reduce / Fold
+    // This will sum all elements
+    let sum: i32 = numbers.iter().fold(0, |acc, x| acc + x);
+    println!("\t [fold] Sum: {}", sum);
 }
