@@ -1,4 +1,8 @@
+use rayon::prelude::*;
 use std::collections::HashMap;
+use wikipedia::http::default::Client;
+use wikipedia::Page;
+use wikipedia::Wikipedia;
 
 fn gen_counts() -> HashMap<char, f32> {
     // Reference letter frequencies
@@ -91,4 +95,56 @@ pub fn guessshift(text: &str, depth: u8) -> (u8, u8, String, f32) {
         }
     }
     (depth, best_shift, decrypted, max_score)
+}
+
+const PAGES: [&str; 5] = [
+    "Mae Poen district",
+    "Bitcoin",
+    "Taiwan",
+    "The Matrix",
+    "Wall (play)",
+];
+
+struct ProcessedPage {
+    title: String,
+    data: String,
+}
+
+fn process_page(page: &Page<Client>) -> ProcessedPage {
+    let title = page.get_title().unwrap();
+    let content = page.get_content().unwrap();
+    ProcessedPage {
+        title,
+        data: content,
+    }
+}
+
+pub fn wikipedia_process_stats() {
+    // Here, we check how long it takes to process pages
+    let start = std::time::Instant::now();
+    let wikipedia = Wikipedia::<Client>::default();
+    let pages: Vec<_> = PAGES
+        .par_iter()
+        .map(|&p| wikipedia.page_from_title(p.to_string()))
+        .collect();
+    let processed_pages: Vec<ProcessedPage> = pages.par_iter().map(process_page).collect();
+    for page in processed_pages {
+        let start_page = std::time::Instant::now();
+
+        println!("Title: {}", page.title.as_str());
+        let first_sentence = page.data.split('.').next().unwrap();
+        println!("First sentence: {}", first_sentence);
+        let word_count = page.data.split_whitespace().count();
+        println!("Word count: {}", word_count);
+        println!("Page time: {:?}", start_page.elapsed());
+    }
+
+    // Statistics
+    println!("Total time {:?}", start.elapsed());
+    println!(
+        "Avg time per page: {:?}",
+        start.elapsed() / PAGES.len() as u32
+    );
+    println!("Total number of pages: {}", PAGES.len());
+    println!("Number of threads: {}", rayon::current_num_threads());
 }

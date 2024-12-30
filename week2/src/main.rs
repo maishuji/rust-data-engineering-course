@@ -29,6 +29,11 @@ fn main() {
     let encrypted_msg = ex_encryption(&message);
     ex_cipher(&message);
     ex_decoding(&encrypted_msg);
+    ex_threads_passing_msg();
+    ex_mutex2();
+    ex_arc();
+    ex_rayon();
+    week2::wikipedia_process_stats();
 }
 
 fn ex_run_threads() {
@@ -167,4 +172,51 @@ fn ex_decoding(message: &str) {
         best_shift, depth, max_score
     );
     println!("Decrypted message : {}", decrypted);
+}
+
+fn ex_threads_passing_msg() {
+    use std::sync::mpsc;
+    use std::thread;
+    let (tx, rx) = mpsc::channel();
+    thread::spawn(move || {
+        let msg = String::from("Polo");
+        tx.send(msg).unwrap();
+    });
+    let received = rx.recv().unwrap();
+    println!("Marco: {}", received);
+}
+
+fn ex_mutex2() {
+    use std::sync::Mutex;
+    let data = Mutex::new(99);
+    {
+        let mut data_access = data.lock().unwrap();
+        *data_access += 1;
+    }
+    println!("data: {:?}", *data.lock().unwrap());
+}
+
+fn ex_arc() {
+    // Arc is used to safely share ownership of data across thread
+    // It wraps types and allows them to be immutabled shared between threads.
+
+    use std::sync::Arc;
+    use std::thread;
+    let data = Arc::new(5);
+    for _ in 0..3 {
+        let data_shared = data.clone();
+        thread::spawn(move || {
+            println!("{:?}", data_shared);
+        });
+    }
+}
+
+fn ex_rayon() {
+    // Rayon is a parallelization library
+    // Used to speed up operations like maps, filters, reduces ..
+    use rayon::prelude::*;
+    let data = vec![1, 2, 3];
+    let parallel_sum: i32 = data.par_iter().map(|x| x * x).sum();
+
+    println!("Parallel sum: {}", parallel_sum);
 }
