@@ -1,5 +1,10 @@
 use clap::Parser;
-use std::thread;
+use rand::rngs::ThreadRng;
+use rand::Rng;
+use std::collections::HashMap;
+//use std::thread;
+
+use week2::print_stats_analysis;
 
 #[derive(Parser)]
 #[clap(
@@ -20,7 +25,10 @@ fn main() {
     ex_mutex();
     ex_csv();
     ex_data_race();
-    ex_encryption();
+    let message = String::from("I am the message to encode and decode");
+    let encrypted_msg = ex_encryption(&message);
+    ex_cipher(&message);
+    ex_decoding(&encrypted_msg);
 }
 
 fn ex_run_threads() {
@@ -86,6 +94,7 @@ fn ex_data_race() {
         //thread::spawn(move || {
         //    data[i] += 1;
         //});
+        data[i] += 1;
     }
 }
 
@@ -103,8 +112,59 @@ fn ceasar_encrypt(text: &str, shift: u8) -> String {
         .collect()
 }
 
-fn ex_encryption() {
-    let text = "Hello, World!";
+fn homophonic_cipher(plaintext: &str) -> (String, HashMap<char, Vec<char>>) {
+    // Create a hashmap to store the mapping
+    // Create a vector of all possible characters
+    let mut rng: ThreadRng = rand::thread_rng();
+    let mut mapping: HashMap<char, Vec<char>> = HashMap::new();
+    let alphabet: Vec<char> = ('a'..='z').collect();
+    // Cipher
+    let mut ciphertext = String::new();
+
+    for c in &alphabet {
+        let homophones: Vec<char> = (0..rng.gen_range(2..4))
+            .map(|_| rng.gen_range('a'..='z'))
+            .collect();
+        mapping.insert(*c, homophones);
+    }
+
+    for c in plaintext.chars() {
+        if let Some(c) = c.to_lowercase().next() {
+            if let Some(homophones) = mapping.get(&c) {
+                if let Some(&homophones) = homophones.get(rng.gen_range(0..homophones.len())) {
+                    ciphertext.push(homophones);
+                } else {
+                    eprintln!("Error: No homophones for character {}", c);
+                }
+            }
+        } else {
+            ciphertext.push(c);
+        }
+    }
+    (ciphertext, mapping)
+}
+
+fn ex_encryption(text: &str) -> String {
     let encrypted = ceasar_encrypt(text, 5);
     println!("Original tex: {}, encrypted (ceasar) : {}", text, encrypted);
+    encrypted
+}
+
+fn ex_cipher(message: &str) -> String {
+    let (ciphertext, _mapping) = homophonic_cipher(message);
+    println!(
+        "Original text: {}, encrypted (homophonic): {}",
+        message, ciphertext
+    );
+    ciphertext
+}
+
+fn ex_decoding(message: &str) {
+    print_stats_analysis(message);
+    let (depth, best_shift, decrypted, max_score) = week2::guessshift(&message, 26);
+    println!(
+        "Best shift: {} (out of {}), score: {}",
+        best_shift, depth, max_score
+    );
+    println!("Decrypted message : {}", decrypted);
 }
